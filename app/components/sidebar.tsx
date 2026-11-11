@@ -10,6 +10,7 @@ import {
   GraduationCap,
   MessageSquare,
   Shield,
+  ReceiptText,
   Tag,
   Users,
   UsersRound,
@@ -96,6 +97,12 @@ const navItems: NavItem[] = [
     label: "Categories",
     to: "/admin/categories",
     icon: <Tag className="size-4" />,
+    roles: [UserRole.Admin],
+  },
+  {
+    label: "Refund Requests",
+    to: "/admin/refunds",
+    icon: <ReceiptText className="size-4" />,
     roles: [UserRole.Admin],
   },
 ];

@@ -37,6 +37,13 @@ export enum RefundStatus {
   Declined = "declined",
 }
 
+// What happened to the money once a Refund Request is approved.
+export enum RefundState {
+  Pending = "pending",
+  Issued = "issued",
+  Failed = "failed",
+}
+
 export enum TeamMemberRole {
   Admin = "admin",
   Member = "member",
@@ -249,6 +256,8 @@ export const refunds = sqliteTable(
       .$defaultFn(() => new Date().toISOString()),
     resolvedAt: text("resolved_at"),
     resolvedByUserId: integer("resolved_by_user_id").references(() => users.id),
+    // Null until the request is approved — a declined request has no Refund.
+    refundState: text("refund_state").$type<RefundState>(),
   },
   (table) => [index("refunds_purchase_idx").on(table.purchaseId)]
 );
@@ -288,6 +297,9 @@ export const coupons = sqliteTable("coupons", {
     .references(() => purchases.id),
   redeemedByUserId: integer("redeemed_by_user_id").references(() => users.id),
   redeemedAt: text("redeemed_at"),
+  // Set when the purchase behind the coupon is refunded. A void coupon can
+  // never be redeemed.
+  voidedAt: text("voided_at"),
   createdAt: text("created_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
