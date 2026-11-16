@@ -1,4 +1,13 @@
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
+import { useEffect, useState } from "react";
+import {
+  PrototypeSwitcher,
+  usePrototypeVariant,
+  VariantABell,
+  VariantBInboxPage,
+  VariantBNavItem,
+  VariantCTopBar,
+} from "~/components/notifications-prototype";
 import type { Route } from "./+types/layout.app";
 import { Sidebar } from "~/components/sidebar";
 import { DevUI } from "~/components/dev-ui";
@@ -227,16 +236,37 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
     isTeamAdmin: userIsTeamAdmin,
   } = loaderData;
 
+  // PROTOTYPE: notifications Inbox variants. Remove with the prototype.
+  const variant = usePrototypeVariant();
+  const [inboxOpen, setInboxOpen] = useState(false);
+  const location = useLocation();
+  useEffect(() => setInboxOpen(false), [location.pathname, variant]);
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar
         currentUser={currentUser}
         recentCourses={recentCourses}
         isTeamAdmin={userIsTeamAdmin}
+        headerExtra={currentUser && variant === "A" ? <VariantABell /> : null}
+        navExtra={
+          currentUser && variant === "B" ? (
+            <VariantBNavItem
+              active={inboxOpen}
+              onOpen={() => setInboxOpen(true)}
+            />
+          ) : null
+        }
       />
       <main className="flex-1 overflow-y-auto">
-        <Outlet />
+        {currentUser && variant === "C" && <VariantCTopBar />}
+        {variant === "B" && inboxOpen ? (
+          <VariantBInboxPage onClose={() => setInboxOpen(false)} />
+        ) : (
+          <Outlet />
+        )}
       </main>
+      <PrototypeSwitcher current={variant} />
       <DevUI
         users={users}
         currentUser={currentUser}
